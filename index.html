@@ -52,6 +52,9 @@ a{color:#176b57}
 
   document.getElementById("buy-button").addEventListener("click", function () {
     Paddle.Checkout.open({
+      settings: {
+        successUrl: "https://ramz40.github.io/fatoorti/"
+      },
       items: [{
         priceId: "pri_01m5a82jdq325rs8ydw7251ytt",
         quantity: 1
