@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فاتورتي | منشئ الفواتير العربية</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f5f9;color:#172033;font-family:Arial,sans-serif}
+header{background:#123b35;color:white;padding:24px 16px;text-align:center}
+header h1{margin:0 0 8px;font-size:28px}
+header p{margin:0;color:#d1fae5}
+main{max-width:850px;margin:20px auto;padding:0 12px}
+.card{background:white;border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 15px #0f172a0c}
+h2{font-size:18px;margin-top:0}
+input,textarea,button{font:inherit}
+input,textarea{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;margin:5px 0 12px;background:white}
+label{font-size:14px;font-weight:bold}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+table{width:100%;border-collapse:collapse;margin:12px 0}
+th,td{padding:9px 5px;border-bottom:1px solid #e2e8f0;text-align:right}
+th{background:#f8fafc;font-size:13px}
+td input{margin:0;padding:8px;min-width:55px}
+button{border:0;border-radius:9px;padding:12px 16px;cursor:pointer;font-weight:bold}
+.primary{background:#176b57;color:white}
+.secondary{background:#e2e8f0;color:#172033}
+.danger{background:#fee2e2;color:#991b1b;padding:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.total{text-align:left;font-size:22px;font-weight:bold;margin:18px 0}
+footer{text-align:center;padding:20px;color:#64748b;font-size:12px}
+@media(max-width:540px){.row{grid-template-columns:1fr}table{font-size:13px}th,td{padding:6px 3px}}
+@media print{
+body{background:white}.no-print,header p,footer{display:none!important}
+header{background:white;color:black;padding:10px}
+main{max-width:none;margin:0;padding:0}
+.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+input,textarea{border:0;padding:2px;margin:0;appearance:none;color:black}
+.remove-col{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>فاتورتي</h1>
+<p>أنشئ فاتورتك العربية بسهولة من هاتفك</p>
+</header>
+<main>
+<section class="card">
+<h2>معلومات الفاتورة</h2>
+<div class="row">
+<div><label>اسم النشاط التجاري</label><input id="business" placeholder="اسم متجرك أو نشاطك"></div>
+<div><label>رقم الفاتورة</label><input id="number" value="INV-001"></div>
+<div><label>اسم العميل</label><input id="client" placeholder="اسم العميل"></div>
+<div><label>تاريخ الفاتورة</label><input id="date" type="date"></div>
+</div>
+<label>ملاحظات</label>
+<textarea id="notes" rows="2" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+</section>
+
+<section class="card">
+<h2>الأصناف والخدمات</h2>
+<table>
+<thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th class="remove-col"></th></tr></thead>
+<tbody id="items"></tbody>
+</table>
+<div class="actions no-print">
+<button class="secondary" id="add">+ إضافة صنف</button>
+</div>
+<div class="row no-print">
+<div>
+<label>الخصم (%)</label>
+<input id="discount" type="number" min="0" max="100" step="any" value="0">
+</div>
+<div>
+<label>الضريبة (%)</label>
+<input id="taxRate" type="number" min="0" max="100" step="any" value="0">
+</div>
+</div>
+<div style="max-width:360px;margin-right:auto">
+<p>المجموع قبل الخصم: <b><span id="subtotal">0.00</span></b></p>
+<p>قيمة الخصم: <b><span id="discountAmount">0.00</span></b></p>
+<p>قيمة الضريبة: <b><span id="taxAmount">0.00</span></b></p>
+<div class="total">الإجمالي النهائي: <span id="total">0.00</span> <span id="currencyLabel">USD</span></div>
+</div>
+<label>العملة</label>
+<select id="currency" style="padding:10px;border:1px solid #cbd5e1;border-radius:8px">
+<option value="USD">USD — دولار</option>
+<option value="ILS">ILS — شيكل</option>
+<option value="EUR">EUR — يورو</option>
+<option value="JOD">JOD — دينار أردني</option>
+</select>
+</section>
+
+<section class="card">
+<div class="actions no-print">
+<button class="primary" id="print">طباعة / حفظ PDF</button>
+<button class="secondary" id="save">حفظ المسودة على هذا الجهاز</button>
+<button class="secondary" id="load">استعادة المسودة</button>
+<button class="secondary" id="exportData">تصدير بيانات الفاتورة</button>
+<button class="secondary" id="importData">استيراد بيانات فاتورة</button>
+<input id="importFile" type="file" accept=".json,application/json" hidden>
+<button class="danger" id="clear">مسح النموذج</button>
+</div>
+<p style="color:#64748b;font-size:13px">المسودة تُحفظ محليًا في متصفحك فقط. لا تدخل بيانات حساسة للعميل.</p>
+</section>
+</main>
+<footer>فاتورتي — أداة بسيطة لإنشاء الفواتير. راجع المتطلبات الضريبية المحلية قبل إصدار فواتير رسمية.</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const items=$('items');
+function addItem(name='',qty=1,price=0){
+const tr=document.createElement('tr');
+tr.innerHTML='<td><input class="iname" placeholder="اسم الصنف"></td>'+
+'<td><input class="qty" type="number" min="0" step="any" value="1"></td>'+
+'<td><input class="price" type="number" min="0" step="any" value="0"></td>'+
+'<td class="lineTotal">0.00</td>'+
+'<td class="remove-col"><button type="button" class="danger remove">×</button></td>';
+tr.querySelector('.iname').value=name;
+tr.querySelector('.qty').value=qty;
+tr.querySelector('.price').value=price;
+tr.querySelectorAll('input').forEach(el=>el.addEventListener('input',calculate));
+tr.querySelector('.remove').addEventListener('click',()=>{tr.remove();calculate()});
+items.appendChild(tr);calculate();
+}
+function calculate(){
+let subtotal=0;
+items.querySelectorAll('tr').forEach(tr=>{
+const q=Math.max(0,Number(tr.querySelector('.qty').value)||0);
+const p=Math.max(0,Number(tr.querySelector('.price').value)||0);
+const line=q*p;
+subtotal+=line;
+tr.querySelector('.lineTotal').textContent=line.toFixed(2);
+});
+const discountRate=Math.min(100,Math.max(0,Number($('discount').value)||0));
+const taxRate=Math.min(100,Math.max(0,Number($('taxRate').value)||0));
+const discount=subtotal*discountRate/100;
+const taxable=subtotal-discount;
+const tax=taxable*taxRate/100;
+const total=taxable+tax;
+$('subtotal').textContent=subtotal.toFixed(2);
+$('discountAmount').textContent=discount.toFixed(2);
+$('taxAmount').textContent=tax.toFixed(2);
+$('total').textContent=total.toFixed(2);
+$('currencyLabel').textContent=$('currency').value;
+}
+function collect(){
+return {
+business:$('business').value,number:$('number').value,
+client:$('client').value,date:$('date').value,notes:$('notes').value,
+currency:$('currency').value,
+discount:$('discount').value,taxRate:$('taxRate').value,
+items:[...items.querySelectorAll('tr')].map(tr=>({
+name:tr.querySelector('.iname').value,
+qty:tr.querySelector('.qty').value,
+price:tr.querySelector('.price').value
+}))
+};
+}
+function restore(d){
+['business','number','client','date','notes','currency','discount','taxRate'].forEach(k=>{if(d[k]!==undefined)$(k).value=d[k]});
+items.innerHTML='';
+(d.items||[]).forEach(x=>addItem(x.name,x.qty,x.price));
+if(!d.items||!d.items.length)addItem();
+calculate();
+}
+$('add').onclick=()=>addItem();
+$('print').onclick=()=>window.print();
+$('save').onclick=()=>{
+try{localStorage.setItem('fatoorti_draft',JSON.stringify(collect()));alert('تم حفظ المسودة على هذا الجهاز.')}
+catch(e){alert('تعذر الحفظ في هذا المتصفح.')}
+};
+$('load').onclick=()=>{
+try{const d=localStorage.getItem('fatoorti_draft');if(d)restore(JSON.parse(d));else alert('لا توجد مسودة محفوظة.')}
+catch(e){alert('تعذر استعادة المسودة.')}
+};
+
+$('exportData').onclick=()=>{
+try{
+const data=collect();
+const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;
+a.download='fatoorti-invoice-'+(data.number||'draft').replace(/[^a-zA-Z0-9_-]/g,'_')+'.json';
+document.body.appendChild(a);
+a.click();
+a.remove();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+}catch(e){alert('تعذر تصدير البيانات.');}
+};
+$('importData').onclick=()=>$('importFile').click();
+$('importFile').onchange=async()=>{
+const file=$('importFile').files[0];
+if(!file)return;
+try{
+if(file.size>1024*1024)throw new Error('حجم الملف أكبر من 1 ميغابايت.');
+const data=JSON.parse(await file.text());
+if(!data||typeof data!=='object'||!Array.isArray(data.items))throw new Error('الملف ليس نسخة فاتورة صالحة.');
+if(!confirm('سيتم استبدال بيانات الفاتورة الحالية. هل تريد المتابعة؟'))return;
+restore(data);
+alert('تم استيراد بيانات الفاتورة بنجاح.');
+}catch(e){alert('تعذر استيراد الملف: '+e.message);}
+finally{$('importFile').value='';}
+};
+
+$('clear').onclick=()=>{
+if(confirm('متأكد أنك تريد مسح الفاتورة الحالية؟')){
+$('business').value='';$('client').value='';$('notes').value='';
+items.innerHTML='';$('number').value='INV-001';addItem();
+}
+};
+$('currency').onchange=calculate;
+$('discount').addEventListener('input',calculate);
+$('taxRate').addEventListener('input',calculate);
+$('date').value=new Date().toISOString().slice(0,10);
+addItem();
+</script>
+</body>
+</html>
