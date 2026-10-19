@@ -38,9 +38,17 @@ a{color:#176b57}
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <script>
   Paddle.Environment.set("sandbox");
+  if (sessionStorage.getItem("fatoortiSandboxPaid") === "1") {
+    document.getElementById("paddle-status").textContent =
+      "تم الدفع التجريبي بنجاح. شكرًا لشرائك فاتورتي!";
+    sessionStorage.removeItem("fatoortiSandboxPaid");
+  }
   Paddle.Initialize({
     eventCallback: function (event) {
       console.log("Paddle event:", event);
+      if (event && event.name === "checkout.completed") {
+        sessionStorage.setItem("fatoortiSandboxPaid", "1");
+      }
       if (event && (event.name === "checkout.error" ||
                     event.name === "checkout.warning")) {
         document.getElementById("paddle-status").textContent =
