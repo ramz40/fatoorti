@@ -32,7 +32,25 @@ a{color:#176b57}
 <h2>أنشئ فاتورتك بسهولة</h2>
 <p>فاتورتي أداة صغيرة تعمل داخل متصفحك لمساعدتك في إنشاء الفواتير وإدارة حساباتها الأساسية.</p>
 <p class="price">السعر المقترح: 4.99 دولار</p>
-<small>هذا سعر مبدئي للتخطيط، وليس عرض شراء فعالًا. لا يوجد دفع أو تنزيل مدفوع في هذه الصفحة حاليًا.</small>
+<div id="paddle-status">الدفع التجريبي — 4.99 دولار</div>
+<button id="buy-button" type="button">جرّب الشراء</button>
+
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+  Paddle.Environment.set("sandbox");
+  Paddle.Initialize({
+    token: "test_7692ea63483947c78441fe214f4"
+  });
+
+  document.getElementById("buy-button").addEventListener("click", function () {
+    Paddle.Checkout.open({
+      items: [{
+        priceId: "pri_01m5a82jdq325rs8ydw7251ytt",
+        quantity: 1
+      }]
+    });
+  });
+</script>
 </section>
 <section>
 <h2>ماذا تتضمن الحزمة؟</h2>
