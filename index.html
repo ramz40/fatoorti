@@ -39,6 +39,14 @@ a{color:#176b57}
 <script>
   Paddle.Environment.set("sandbox");
   Paddle.Initialize({
+    eventCallback: function (event) {
+      console.log("Paddle event:", event);
+      if (event && (event.name === "checkout.error" ||
+                    event.name === "checkout.warning")) {
+        document.getElementById("paddle-status").textContent =
+          "خطأ في الدفع التجريبي: " + JSON.stringify(event);
+      }
+    },
     token: "test_7692ea63483947c78441fe214f4"
   });
 
