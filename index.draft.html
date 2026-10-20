@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="فاتورتي: أداة عربية بسيطة لإنشاء الفواتير وحساب الخصومات والضرائب.">
+<title>فاتورتي | منشئ الفواتير العربية</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f6f8f7;color:#18312b;line-height:1.8}
+header{padding:22px;text-align:center;background:#123b35;color:white}
+main{max-width:850px;margin:28px auto;padding:0 16px}
+section{background:white;border:1px solid #e1e9e5;border-radius:16px;padding:22px;margin-bottom:18px}
+h1{margin:0;font-size:32px}
+h2{margin-top:0}
+.tag{color:#d1fae5}
+.price{font-size:30px;font-weight:bold}
+button{border:0;background:#176b57;color:white;border-radius:9px;padding:12px 18px;font-size:16px}
+li{margin:7px 0}
+small{color:#52645e}
+footer{text-align:center;padding:24px;color:#52645e}
+a{color:#176b57}
+</style>
+</head>
+<body>
+<header>
+<h1>فاتورتي</h1>
+<p class="tag">منشئ الفواتير العربية — بسيط ويعمل محليًا</p>
+</header>
+<main>
+<section>
+<h2>أنشئ فاتورتك بسهولة</h2>
+<p>فاتورتي أداة صغيرة تعمل داخل متصفحك لمساعدتك في إنشاء الفواتير وإدارة حساباتها الأساسية.</p>
+<p class="price">السعر المقترح: 4.99 دولار</p>
+<div id="paddle-status">الدفع التجريبي — 4.99 دولار</div>
+<button id="buy-button" type="button">جرّب الشراء</button>
+
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+  Paddle.Environment.set("sandbox");
+  const statusEl = document.getElementById("paddle-status");
+
+  async function verifyLicense() {
+    const tx = new URLSearchParams(window.location.search).get("_ptxn");
+    if (!tx) return;
+
+    statusEl.textContent = "تم الدفع، جارٍ التحقق من رمز الترخيص...";
+    const endpoint =
+      "https://fatoorti-payment-draft.ramzmog.workers.dev/license?transaction_id=" +
+      encodeURIComponent(tx);
+
+    for (let attempt = 0; attempt < 30; attempt++) {
+      try {
+        const response = await fetch(endpoint, { cache: "no-store" });
+        const result = await response.json();
+
+        if (response.ok && result.status === "issued" && result.license_code) {
+          statusEl.textContent = "تم تأكيد الدفع! رمز الترخيص: " + result.license_code;
+          return;
+        }
+
+        if (response.status !== 202 && !response.ok) {
+          statusEl.textContent =
+            "تعذّر التحقق من الترخيص. احتفظ برقم المعاملة وتواصل معنا.";
+          return;
+        }
+      } catch (_) {}
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    statusEl.textContent =
+      "الدفع قيد التحقق. حدّث الصفحة بعد قليل، ولا تدفع مرة أخرى.";
+  }
+
+  verifyLicense();
+  Paddle.Initialize({
+    eventCallback: function (event) {
+      console.log("Paddle event:", event);
+      if (event && event.name === "checkout.completed") {
+        document.getElementById("paddle-status").textContent =
+          "تم استلام الدفع، جارٍ التحقق من رمز الترخيص...";
+      }
+      if (event && (event.name === "checkout.error" ||
+                    event.name === "checkout.warning")) {
+        document.getElementById("paddle-status").textContent =
+          "خطأ في الدفع التجريبي: " + JSON.stringify(event);
+      }
+    },
+    token: "test_7692ea63483947c78441fe214f4"
+  });
+
+  document.getElementById("buy-button").addEventListener("click", function () {
+    Paddle.Checkout.open({
+      settings: {
+        successUrl: "https://ramz40.github.io/fatoorti/index.draft.html"
+      },
+      items: [{
+        priceId: "pri_01m5a82jdq325rs8ydw7251ytt",
+        quantity: 1
+      }]
+    });
+  });
+</script>
+</section>
+<section>
+<h2>ماذا تتضمن الحزمة؟</h2>
+<ul>
+<li>واجهة فواتير باللغة العربية.</li>
+<li>إضافة الأصناف والكميات والأسعار.</li>
+<li>حساب الخصم والضريبة والإجمالي تلقائيًا.</li>
+<li>اختيار العملة المتاحة في الأداة.</li>
+<li>حفظ المسودة واستعادتها على الجهاز.</li>
+<li>تصدير بيانات الفاتورة واستيرادها من ملف JSON.</li>
+<li>الطباعة من المتصفح، مع دعم حفظ PDF حسب إمكانيات الجهاز.</li>
+<li>ملف تعليمات وترخيص استخدام.</li>
+</ul>
+</section>
+<section>
+<h2>طريقة الاستخدام</h2>
+<ol>
+<li>نزّل حزمة المنتج وفك ضغطها.</li>
+<li>افتح ملف index.html في متصفح حديث.</li>
+<li>أدخل بيانات الفاتورة وأضف الأصناف.</li>
+<li>احفظ المسودة أو صدّر نسخة بيانات عند الحاجة.</li>
+</ol>
+</section>
+<section>
+<h2>الخصوصية والحدود</h2>
+<p>الأداة مصممة للعمل محليًا دون حساب مستخدم. المسودات تُحفظ في المتصفح، وملفات JSON التي تصدّرها قد تحتوي بيانات الفواتير.</p>
+<p>الأداة ليست نظام محاسبة معتمدًا ولا تضمن الامتثال الضريبي. المستخدم مسؤول عن مراجعة البيانات والمتطلبات المحلية.</p>
+</section>
+<section>
+<h2>الشروط والاسترداد والخصوصية والدعم</h2>
+<p>يمكنك مراجعة الشروط والأحكام وسياسة الاسترداد وسياسة الخصوصية عبر الروابط أدناه. للدعم والاستفسارات، تواصل عبر البريد الإلكتروني الموضح في هذه الصفحة.</p>
+<p><strong>حالة الصفحة:</strong> مسودة تجريبية؛ ليست جاهزة لاستقبال المدفوعات.</p>
+<p>
+<a href="terms.html">الشروط والأحكام</a> |
+<a href="refund.html">سياسة الاسترداد</a> |
+<a href="privacy.html">سياسة الخصوصية</a>
+<p>للدعم والاستفسارات: <a href="mailto:Ramzmog@gmail.com">Ramzmog@gmail.com</a></p>
+</p>
+</section>
+</main>
+<footer>فاتورتي — نسخة تجريبية</footer>
+</body>
+</html>
