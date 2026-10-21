@@ -37,25 +37,67 @@ a{color:#176b57}
 
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <script>
-  Paddle.Environment.set("sandbox");
-  if (sessionStorage.getItem("fatoortiSandboxPaid") === "1") {
-    document.getElementById("paddle-status").textContent =
-      "تم الدفع التجريبي بنجاح. شكرًا لشرائك فاتورتي!";
-    sessionStorage.removeItem("fatoortiSandboxPaid");
+  Paddle.Environment.set("production");
+  const statusEl = document.getElementById("paddle-status");
+
+  async function verifyLicense() {
+    const tx = new URLSearchParams(window.location.search).get("_ptxn");
+    if (!tx) return;
+
+    statusEl.textContent = "تم استلام الدفع، جارٍ التحقق من رمز الترخيص...";
+
+    const endpoint =
+      "https://fatoorti-payment.ramzmog.workers.dev/license?transaction_id=" +
+      encodeURIComponent(tx);
+
+    for (let attempt = 0; attempt < 30; attempt++) {
+      try {
+        const response = await fetch(endpoint, { cache: "no-store" });
+        const result = await response.json();
+
+        if (response.ok && result.status === "issued" && result.license_code) {
+          statusEl.textContent =
+            "تم تأكيد الدفع! رمز الترخيص: " + result.license_code;
+          return;
+        }
+
+        if (response.status !== 202 && !response.ok) {
+          statusEl.textContent =
+            "تعذّر التحقق من الترخيص. احتفظ برقم المعاملة وتواصل معنا.";
+          return;
+        }
+      } catch (err) {
+        statusEl.textContent =
+          "تعذر الاتصال بخدمة الترخيص من المتصفح. جارٍ إعادة المحاولة...";
+        console.error("License verification failed:", err);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    statusEl.textContent =
+      "الدفع قيد التحقق. حدّث الصفحة بعد قليل، ولا تدفع مرة أخرى.";
   }
+
+  verifyLicense();
+
   Paddle.Initialize({
     eventCallback: function (event) {
       console.log("Paddle event:", event);
+
       if (event && event.name === "checkout.completed") {
-        sessionStorage.setItem("fatoortiSandboxPaid", "1");
+        statusEl.textContent =
+          "تم استلام الدفع، جارٍ التحقق من رمز الترخيص...";
       }
-      if (event && (event.name === "checkout.error" ||
-                    event.name === "checkout.warning")) {
-        document.getElementById("paddle-status").textContent =
-          "خطأ في الدفع التجريبي: " + JSON.stringify(event);
+
+      if (event && (
+        event.name === "checkout.error" ||
+        event.name === "checkout.warning"
+      )) {
+        statusEl.textContent = "خطأ في الدفع التجريبي.";
       }
     },
-    token: "test_7692ea63483947c78441fe214f4"
+    token: "live_e79e9ac2aa2ce9912e27b520931"
   });
 
   document.getElementById("buy-button").addEventListener("click", function () {
@@ -64,7 +106,7 @@ a{color:#176b57}
         successUrl: "https://ramz40.github.io/fatoorti/"
       },
       items: [{
-        priceId: "pri_01m5a82jdq325rs8ydw7251ytt",
+        priceId: "pri_01m5a4dqxb5fh638znfw1k2w6k",
         quantity: 1
       }]
     });
