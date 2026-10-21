@@ -32,7 +32,7 @@ a{color:#176b57}
 <h2>أنشئ فاتورتك بسهولة</h2>
 <p>فاتورتي أداة صغيرة تعمل داخل متصفحك لمساعدتك في إنشاء الفواتير وإدارة حساباتها الأساسية.</p>
 <p class="price">السعر المقترح: 4.99 دولار</p>
-<div id="paddle-status">الدفع التجريبي — 4.99 دولار</div>
+<div id="paddle-status">السعر: 4.99 دولار — الدفع عبر Paddle</div>
 <button id="buy-button" type="button">جرّب الشراء</button>
 
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
@@ -94,7 +94,7 @@ a{color:#176b57}
         event.name === "checkout.error" ||
         event.name === "checkout.warning"
       )) {
-        statusEl.textContent = "خطأ في الدفع التجريبي.";
+        statusEl.textContent = "تعذّر إتمام الدفع. يرجى المحاولة لاحقًا أو التواصل مع الدعم.";
       }
     },
     token: "live_e79e9ac2aa2ce9912e27b520931"
@@ -143,7 +143,7 @@ a{color:#176b57}
 <section>
 <h2>الشروط والاسترداد والخصوصية والدعم</h2>
 <p>يمكنك مراجعة الشروط والأحكام وسياسة الاسترداد وسياسة الخصوصية عبر الروابط أدناه. للدعم والاستفسارات، تواصل عبر البريد الإلكتروني الموضح في هذه الصفحة.</p>
-<p><strong>حالة الصفحة:</strong> مسودة تجريبية؛ ليست جاهزة لاستقبال المدفوعات.</p>
+
 <p>
 <a href="terms.html">الشروط والأحكام</a> |
 <a href="refund.html">سياسة الاسترداد</a> |
