@@ -21,6 +21,34 @@ small{color:#52645e}
 footer{text-align:center;padding:24px;color:#52645e}
 a{color:#176b57}
 </style>
+<style>/* USDT_GREEN_BUTTON */
+#usdt-payment > summary {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 12px;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  list-style: none;
+}
+#usdt-payment > summary::-webkit-details-marker {
+  display: none;
+}
+#usdt-payment > summary:hover {
+  background: #15803d;
+}
+#usdt-payment > summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+</style>
 </head>
 <body>
 <header>
@@ -35,6 +63,26 @@ a{color:#176b57}
 <div id="paddle-status">السعر: 4.99 دولار — الدفع عبر Paddle</div>
 <button id="buy-button" type="button">جرّب الشراء</button>
 
+<details id="usdt-payment" style="border:1px solid #888;border-radius:12px;padding:16px;margin:18px 0">
+  <summary style="cursor:pointer;font-weight:bold">💰 ادفع عن طريق USDT</summary>
+  <div style="margin-top:14px">
+  <h3>أو ادفع عبر USDT</h3>
+  <p>الشبكة: BNB Smart Chain (BEP20) فقط.</p>
+  <p><strong>المبلغ الثابت: 4.99 USDT</strong></p>
+  <p>عنوان المحفظة:</p>
+  <code id="usdt-address" style="display:block;overflow-wrap:anywhere">0xF5b24fe3f57467434C9F5a724DA8E7f770b40734</code>
+  <button id="copy-usdt-address" type="button">نسخ عنوان المحفظة</button>
+  <p id="usdt-copy-status" role="status" aria-live="polite"></p>
+  <p>بعد التحويل، تحقّق من نجاح المعاملة على الشبكة ثم أرسل رقم عملية التحويل عبر البريد.</p>
+  <label for="usdt-txid">رقم عملية التحويل</label>
+  <input id="usdt-txid" type="text" placeholder="الصق رقم عملية التحويل هنا"
+         style="display:block;width:100%;box-sizing:border-box;margin:8px 0;padding:10px;direction:ltr">
+  <button id="usdt-email-button" type="button">إرسال تفاصيل الدفع</button>
+  <p>البريد: <a href="mailto:Ramzmog@gmail.com">Ramzmog@gmail.com</a></p>
+  <p id="usdt-txid-status" role="status" aria-live="polite"></p>
+  <p>سيصدر الترخيص يدويًا بعد التأكد من وصول المبلغ. رسوم الشبكة على المرسل.</p>
+</div>
+</details>
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <script>
   Paddle.Environment.set("production");
@@ -153,5 +201,32 @@ a{color:#176b57}
 </section>
 </main>
 <footer>فاتورتي — نسخة تجريبية</footer>
+<script>
+document.getElementById("usdt-email-button").addEventListener("click", function () {
+  const txid = document.getElementById("usdt-txid").value.trim();
+  const status = document.getElementById("usdt-txid-status");
+  if (!txid) {
+    status.textContent = "أدخل رقم المعاملة أولًا.";
+    return;
+  }
+  const subject = encodeURIComponent("Fatoorti USDT payment - TXID");
+  const body = encodeURIComponent("USDT payment for Fatoorti ($4.99)\nTXID: " + txid +
+    "\nPlease verify the transaction and confirm the license.");
+  window.location.href = "mailto:Ramzmog@gmail.com?subject=" + subject + "&body=" + body;
+});
+document.getElementById("copy-usdt-address").addEventListener("click", async function () {
+  const address = document.getElementById("usdt-address").textContent.trim();
+  if (address.includes("ضع_عنوان_محفظتك")) {
+    document.getElementById("usdt-copy-status").textContent = "عنوان المحفظة غير مضبوط بعد.";
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(address);
+    document.getElementById("usdt-copy-status").textContent = "تم نسخ عنوان المحفظة.";
+  } catch (e) {
+    document.getElementById("usdt-copy-status").textContent = "تعذر النسخ تلقائيًا؛ انسخ العنوان يدويًا.";
+  }
+});
+</script>
 </body>
 </html>
